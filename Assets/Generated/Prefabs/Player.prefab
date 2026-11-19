@@ -11473,6 +11473,7 @@ MonoBehaviour:
   leftLeg: {fileID: 508215540720515532}
   rightLeg: {fileID: 6280594541043567554}
   torchHolder: {fileID: 8753278565032638215}
+  model: {fileID: 5771048363610025962}
 --- !u!1 &7160233859849647895
 GameObject:
   m_ObjectHideFlags: 0

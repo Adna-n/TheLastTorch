@@ -11,6 +11,7 @@ using UnityEngine.UI;
 
 namespace LastTorch
 {
+    [DefaultExecutionOrder(-100)] // register the settings before AudioManager.Awake reads them
     public class MainMenuController : MonoBehaviour
     {
         public GameSettings settings;

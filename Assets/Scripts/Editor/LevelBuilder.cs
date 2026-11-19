@@ -1,8 +1,8 @@
 // LevelBuilder: turns maze.txt into the 3D temple. Each character is one cellSize x cellSize cell
 // (row 0 = north = +Z). Walls become ONE combined mesh (only faces you can see, world-space UVs so the
 // stone tiles evenly) plus one box collider per horizontal run of '#'. The floor is one mesh + one
-// collider. Then it places the spawn, oil jars, gems, keys, doors, the Heart altar and the exit, and
-// adds seeded decoration (vines, glowing glyphs, rubble in dead ends, broken pillars in the Sanctum).
+// collider. Then it places the spawn, oil jars, gems, keys, doors, the Heart altar, the exit and the
+// traps (spike tiles, dart plates with wall launchers, the boulder), and adds seeded decoration (vines, glowing glyphs, rubble in dead ends, broken pillars in the Sanctum).
 // Edit maze.txt (project root or Assets/Resources) and run "2. Build Scenes" to change the layout.
 using System;
 using System.Collections.Generic;
@@ -116,6 +116,9 @@ namespace LastTorch.EditorTools
             items.SetParent(root, false);
             var doors = new GameObject("Doors").transform;
             doors.SetParent(root, false);
+            var traps = new GameObject("Traps").transform;
+            traps.SetParent(root, false);
+            Vector2Int boulderCell = new Vector2Int(-1, -1), triggerCell = new Vector2Int(-1, -1);
 
             for (int r = 0; r < grid.rows; r++)
             {
@@ -142,16 +145,67 @@ namespace LastTorch.EditorTools
                         case 'X':
                             info.exitGate = SceneBuilder.Instantiate("ExitGate", pos, DoorRotation(grid, r, col, null), doors).GetComponent<ExitGate>();
                             break;
-                        // '^', 'T', 'B', 'b' (traps) are plain floor until Phase 4 adds the trap builders.
+                        case '^': SceneBuilder.Instantiate("SpikeTile", pos, Quaternion.identity, traps); break;
+                        case 'T': BuildDartTrap(grid, r, col, s, traps); break;
+                        case 'B': boulderCell = new Vector2Int(r, col); break;
+                        case 'b': triggerCell = new Vector2Int(r, col); break;
                     }
                 }
             }
+            if (boulderCell.x >= 0 && triggerCell.x >= 0) BuildBoulderTrap(grid, boulderCell, triggerCell, traps);
 
             Decorate(grid, faces, rnd, s, root);
             CheckReachability(grid, spawn);
 
             Debug.Log($"[LevelBuilder] Built {grid.cols}x{grid.rows} maze: {info.gems} gems, {info.oilJars} oil jars, {info.keys} keys.");
             return info;
+        }
+
+        /// <summary>Pressure plate + a dart launcher on every wall face around the tile (firing across it).</summary>
+        static void BuildDartTrap(Grid grid, int r, int col, GameSettings s, Transform parent)
+        {
+            Vector3 pos = grid.World(r, col);
+            var plate = SceneBuilder.Instantiate("DartPlate", pos, Quaternion.identity, parent);
+            var launchers = new List<Transform>();
+            foreach (var d in Dirs)
+            {
+                if (!grid.IsWall(r + d.x, col + d.y)) continue;
+                Vector3 toWall = Grid.DirToWorld(d);
+                Vector3 lp = pos + toWall * (grid.size * 0.5f) + Vector3.up * s.dartLauncherHeight;
+                var launcher = SceneBuilder.Instantiate("DartLauncher", lp, Quaternion.LookRotation(-toWall), plate.transform);
+                launchers.Add(launcher.transform);
+            }
+            plate.GetComponent<DartTrap>().launchers = launchers.ToArray();
+        }
+
+        /// <summary>Boulder resting at B; stepping on b releases it along the row/column toward b, to the end wall.</summary>
+        static void BuildBoulderTrap(Grid grid, Vector2Int b, Vector2Int trigger, Transform parent)
+        {
+            if (b.x != trigger.x && b.y != trigger.y)
+            {
+                Debug.LogWarning("[LevelBuilder] Boulder 'B' and trigger 'b' must be in the same row or column. Boulder skipped.");
+                return;
+            }
+            var step = new Vector2Int(Math.Sign(trigger.x - b.x), Math.Sign(trigger.y - b.y));
+            Vector3 dir = Grid.DirToWorld(step);
+            var cell = b;
+            while (grid.IsWalkable(cell.x + step.x, cell.y + step.y) && !Grid.IsDoor(grid.cells[cell.x + step.x, cell.y + step.y]))
+                cell += step;
+
+            float radius = grid.size * 0.38f;
+            var boulder = SceneBuilder.Instantiate("Boulder", grid.World(b.x, b.y) + Vector3.up * radius, Quaternion.identity, parent);
+
+            var trapGo = new GameObject("BoulderTrap");
+            trapGo.transform.SetParent(parent, false);
+            trapGo.transform.position = grid.World(trigger.x, trigger.y);
+            var trap = trapGo.AddComponent<BoulderTrap>();
+            trap.boulder = boulder.transform;
+            trap.radius = radius;
+            trap.direction = dir;
+            trap.endPoint = grid.World(cell.x, cell.y) + dir * (grid.size * 0.5f - radius - 0.05f) + Vector3.up * radius;
+            trap.rumble = boulder.GetComponent<AudioSource>();
+            trap.rubblePrefab = PrefabFactory.Load("Rubble");
+            trap.dustBurstPrefab = PrefabFactory.Load("DustBurst");
         }
 
         static Vector2Int Find(Grid grid, char ch)
@@ -304,6 +358,7 @@ namespace LastTorch.EditorTools
                 for (int c = 0; c < grid.cols; c++)
                 {
                     if (!grid.IsWalkable(r, c)) continue;
+                    if (grid.cells[r, c] == '^' || grid.cells[r, c] == 'T') continue; // trap tiles bring their own floor
                     Vector3 p = grid.World(r, c);
                     float x0 = p.x - half, x1 = p.x + half, z0 = p.z - half, z1 = p.z + half;
                     mb.AddQuadOutward(new Vector3(x0, 0f, z0), new Vector3(x0, 0f, z1), new Vector3(x1, 0f, z1), new Vector3(x1, 0f, z0), p + Vector3.down,
@@ -334,7 +389,7 @@ namespace LastTorch.EditorTools
             foreach (var f in faces)
             {
                 double roll = rnd.NextDouble();
-                if (Grid.IsDoor(f.neighbour)) continue;
+                if (Grid.IsDoor(f.neighbour) || f.neighbour == 'T') continue; // keep door edges and dart launchers clear
                 Quaternion facing = Quaternion.LookRotation(-f.normal); // quads are visible from their -Z side
                 if (roll < 0.15)
                 {

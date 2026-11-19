@@ -50,10 +50,12 @@ Note: Unity 6000.6.0f1 is also installed. Always use **6000.3.24f1** for this pr
 ## Progress notes
 - Phase 2 also built the **Main Menu** early (user request): `SceneBuilder.BuildMainMenu`, `MainMenuController`,
   `UIFactory`, `ProfileManager`. `GameManager` already records attempts/results to profiles.
-- Phase 3 done: Temple scene from `LevelBuilder` (maze.txt synced root -> Assets/Resources, newest wins).
-  Test scene removed. Hints go through `GameManager.ShowHint` / `OnHint`; `DebugOverlay` displays them,
-  the collapse timer and intro text until the HUD exists — **remove DebugOverlay in Phase 5**.
-- **Phase 4 TODO:** trap chars `^ T B b` are plain floor in `LevelBuilder.Build` (see the switch comment).
+- Phases 3-6 done: Temple from `LevelBuilder` (maze.txt synced root -> Assets/Resources, newest wins),
+  traps (`Scripts/Traps`), HUD / PauseMenu / EndScreen built by their own `Build(UISkin, canvas)` methods
+  (called from `SceneBuilder.BuildTempleUI`). Hints go through `GameManager.ShowHint` / `OnHint`.
+- Balance change (Phase 6): exit `X` moved from row 15 col 0 to row 19 col 0 (entrance hall) so the
+  collapse escape is 25 cells instead of 3. Fuel defaults verified with a BFS route length (199 cells to Heart).
+- `BuildScript` exists (menu "3. Build Windows EXE"). **Remaining: Phase 7 GitHub/README/release, Phase 8 cheat sheet** (user will do GitHub).
 - Scenes without a GameManager call `GameManager.RegisterSettings(settings)` so `GameManager.Settings` works.
 - Prefab door convention: slab spans local X, player approaches from local -Z (front); ExitGate's outside is +Z.
 

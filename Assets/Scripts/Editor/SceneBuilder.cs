@@ -120,9 +120,31 @@ namespace LastTorch.EditorTools
             collapse.debrisPrefab = PrefabFactory.Load("Debris");
             var audio = CreateAudioManager(managers.transform);
             audio.startLoop = SoundId.AmbientDrone;
-            managers.AddComponent<DebugOverlay>(); // temporary until the HUD (Phase 5)
+
+            BuildTempleUI();
 
             EditorSceneManager.SaveScene(scene, TemplePath);
+        }
+
+        /// <summary>In-game UI: HUD (+ intro overlay), end screen with fades, pause menu (top-most).</summary>
+        static void BuildTempleUI()
+        {
+            var skin = new UISkin
+            {
+                bar = TextureGenerator.LoadSprite("ui_bar"),
+                heart = TextureGenerator.LoadSprite("ui_heart"),
+                vignette = TextureGenerator.LoadSprite("ui_vignette"),
+                glyphSun = TextureGenerator.Load("glyph_sun"),
+                glyphMoon = TextureGenerator.Load("glyph_moon"),
+                glyphSerpent = TextureGenerator.Load("glyph_serpent"),
+            };
+            var canvas = UIFactory.CreateCanvas("GameCanvas").transform;
+            UIFactory.CreateEventSystem();
+
+            var ui = new GameObject("UI");
+            ui.AddComponent<HUDController>().Build(skin, canvas);
+            ui.AddComponent<EndScreen>().Build(skin, canvas);
+            ui.AddComponent<PauseMenu>().Build(skin, canvas);
         }
 
         // ------------------------------------------------------------------ main menu

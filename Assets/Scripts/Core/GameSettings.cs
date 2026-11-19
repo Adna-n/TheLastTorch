@@ -79,6 +79,22 @@ namespace LastTorch
         public float dartSpeed = 14f;
         public float dartCooldown = 2f;
         public float boulderSpeed = 8f;
+        [Tooltip("Hearts lost per trap hit (spikes, darts, boulder, falling rocks).")]
+        public int trapDamage = 1;
+        [Tooltip("Delay between neighbouring spike tiles, creating a wave.")]
+        public float spikeWaveOffset = 0.35f;
+        [Tooltip("How far the spikes poke up during the warning (metres).")]
+        public float spikeWarnRise = 0.3f;
+        public float spikeMoveSpeed = 10f;
+        [Tooltip("Spike sounds only play when the player is this close.")]
+        public float spikeSoundDistance = 14f;
+        [Tooltip("Delay between stepping on a dart plate and the darts firing.")]
+        public float dartFireDelay = 0.25f;
+        public float dartLifetime = 3f;
+        public float dartLauncherHeight = 1.1f;
+        public float dartPlateSinkDepth = 0.06f;
+        [Tooltip("The boulder knocks the player back this many times harder than normal hits.")]
+        public float boulderKnockbackMultiplier = 1.6f;
 
         [Header("Collapse")]
         public float collapseDuration = 60f;
@@ -153,6 +169,8 @@ namespace LastTorch
         public float breathSwayAngle = 1.2f;
         public float flinchAngle = 20f;
         public float flinchDuration = 0.3f;
+        [Tooltip("Degrees per second the explorer tips over when out of hearts.")]
+        public float deathFallSpeed = 220f;
 
         [Header("Intro")]
         public float introDuration = 7f;
@@ -180,9 +198,21 @@ namespace LastTorch
         public float menuTorchIntensity = 2.5f;
         public float menuTorchRange = 9f;
 
-        [Header("Debug")]
-        [Tooltip("Enables the debug overlay keys (H = hurt, R = restart). Turn off for the final build.")]
-        public bool enableDebugKeys = true;
+        [Header("HUD & Screens")]
+        public float floatingTextDuration = 1.1f;
+        [Tooltip("How far (UI pixels) the floating +points text rises.")]
+        public float floatingTextRise = 90f;
+        [Range(0f, 1f)] public float damageFlashAlpha = 0.4f;
+        public float damageFlashFade = 0.5f;
+        public float lowFuelPulseSpeed = 6f;
+        public float hintFadeTime = 0.4f;
+        [Tooltip("Seconds the controls reminder shows after the intro.")]
+        public float controlsHintDuration = 6f;
+        public float introLineFade = 1f;
+        [Tooltip("White fade before the win screen.")]
+        public float winFadeTime = 1.2f;
+        [Tooltip("Dark fade before the lose screen.")]
+        public float loseFadeTime = 1f;
 
         /// <summary>Fuel burn multiplier for the chosen difficulty.</summary>
         public float GetDifficultyMultiplier(Difficulty difficulty)

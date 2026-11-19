@@ -134,6 +134,7 @@ namespace LastTorch.EditorTools
             animator.leftLeg = leftLeg;
             animator.rightLeg = rightLeg;
             animator.torchHolder = torch;
+            animator.model = model;
 
             return root;
         }

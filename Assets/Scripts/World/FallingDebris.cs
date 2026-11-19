@@ -70,7 +70,7 @@ namespace LastTorch
         void Impact(GameSettings s)
         {
             if (player != null && DoorMotion.FlatDistance(player.transform.position, ground) <= s.debrisHitRadius)
-                player.TakeDamage(1, ground);
+                player.TakeDamage(s.trapDamage, ground);
 
             if (AudioManager.Instance != null) AudioManager.Instance.PlayAt(SoundId.DoorSlam, ground, 0.5f, Random.Range(1.3f, 1.7f));
             Effects.Spawn(dustBurstPrefab, ground + Vector3.up * 0.2f);

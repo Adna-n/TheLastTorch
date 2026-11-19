@@ -274,7 +274,16 @@ namespace LastTorch.EditorTools
                         Visual($"Spike_{x}_{z}", spikes, "Spike", "Metal", p, new Vector3(1.4f, 1.4f, 1.4f));
                     }
                 }
+                go.AddComponent<SpikeTrap>().spikes = spikes;
                 Save(go, "SpikeTile");
+            }
+            GameObject dartPrefab;
+            {
+                // Dart: no collider, it sphere-casts ahead each frame
+                var go = new GameObject("Dart");
+                Visual("Mesh", go.transform, "Dart", "Metal", Vector3.zero, Vector3.one * 1.3f, default, false);
+                go.AddComponent<Dart>();
+                dartPrefab = Save(go, "Dart");
             }
             {
                 var go = new GameObject("DartPlate");
@@ -285,6 +294,9 @@ namespace LastTorch.EditorTools
                 col.size = new Vector3(c, 0.2f, c);
                 var plate = Visual("Plate", go.transform, "Plate", "Stone_Dark", new Vector3(0f, 0.02f, 0f));
                 Visual("PlateGlyph", plate.transform, "Quad", "Glyph_Wall_4", new Vector3(0f, 0.061f, 0f), Vector3.one * c * 0.4f, new Vector3(90f, 0f, 0f), false);
+                var trap = go.AddComponent<DartTrap>();
+                trap.plate = plate.transform;
+                trap.dartPrefab = dartPrefab;
                 Save(go, "DartPlate");
             }
             {
@@ -294,23 +306,18 @@ namespace LastTorch.EditorTools
                 Save(go, "DartLauncher");
             }
             {
-                var go = new GameObject("Dart");
-                Visual("Mesh", go.transform, "Dart", "Metal", Vector3.zero, Vector3.one * 1.3f);
-                var col = go.AddComponent<CapsuleCollider>();
-                col.isTrigger = true;
-                col.direction = 2;
-                col.radius = 0.06f;
-                col.height = 0.55f;
-                var rb = go.AddComponent<Rigidbody>();
-                rb.isKinematic = true;
-                rb.useGravity = false;
-                Save(go, "Dart");
-            }
-            {
+                // Boulder: no collider (it damages by distance), rumble loop starts when released
                 var go = new GameObject("Boulder");
                 float radius = c * 0.38f;
                 Visual("Mesh", go.transform, "Rock_Boulder", "Rock", Vector3.zero, Vector3.one * radius);
-                go.AddComponent<SphereCollider>().radius = radius;
+                var rumble = go.AddComponent<AudioSource>();
+                rumble.clip = AudioGenerator.Load("boulder_roll");
+                rumble.loop = true;
+                rumble.playOnAwake = false;
+                rumble.spatialBlend = 1f;
+                rumble.minDistance = 3f;
+                rumble.maxDistance = 30f;
+                rumble.rolloffMode = AudioRolloffMode.Linear;
                 Save(go, "Boulder");
             }
             {

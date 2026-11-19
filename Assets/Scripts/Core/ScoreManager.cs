@@ -1,6 +1,7 @@
 // ScoreManager: keeps the score, split into categories (gems, oil, keys, heart, damage, bonuses)
-// so the end screen can show a breakdown. Point values come from GameSettings.
-// Final score on a win = collected points - damage + escape bonus + torch bonus; on a loss, no bonuses.
+// plus how many of each were collected, so the end screen can show a breakdown. Point values come
+// from GameSettings. Final score on a win = collected points - damage + escape bonus + torch bonus;
+// on a loss there are no bonuses.
 using System;
 using UnityEngine;
 
@@ -12,9 +13,11 @@ namespace LastTorch
     {
         public static ScoreManager Instance { get; private set; }
 
-        readonly int[] points = new int[Enum.GetValues(typeof(ScoreCategory)).Length];
+        static readonly int CategoryCount = Enum.GetValues(typeof(ScoreCategory)).Length;
+        readonly int[] points = new int[CategoryCount];
+        readonly int[] counts = new int[CategoryCount];
 
-        public int GemsCollected { get; private set; }
+        public int GemsCollected => counts[(int)ScoreCategory.Gems];
 
         /// <summary>Current total (never below zero).</summary>
         public int Total
@@ -34,12 +37,14 @@ namespace LastTorch
         void OnDestroy() { if (Instance == this) Instance = null; }
 
         public int GetPoints(ScoreCategory category) => points[(int)category];
+        /// <summary>How many times points were added in this category (gems picked up, hits taken...).</summary>
+        public int GetCount(ScoreCategory category) => counts[(int)category];
 
         public void AddPoints(int amount, ScoreCategory category)
         {
             if (GameManager.Instance != null && GameManager.Instance.IsGameOver) return;
             points[(int)category] += amount;
-            if (category == ScoreCategory.Gems) GemsCollected++;
+            counts[(int)category]++;
             OnScoreChanged?.Invoke(Total, amount, category);
         }
 
@@ -47,6 +52,7 @@ namespace LastTorch
         {
             if (GameManager.Instance != null && GameManager.Instance.IsGameOver) return;
             points[(int)ScoreCategory.Damage] -= amount;
+            counts[(int)ScoreCategory.Damage]++;
             OnScoreChanged?.Invoke(Total, -amount, ScoreCategory.Damage);
         }
 

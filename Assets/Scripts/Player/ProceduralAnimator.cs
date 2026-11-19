@@ -1,7 +1,8 @@
 // ProceduralAnimator: animates the primitive-built explorer without any animation clips.
 // Legs and the free arm swing with a sine wave scaled by movement speed, the body bobs each step,
 // the torch arm stays raised (the torch itself is kept upright), an idle "breathing" motion plays
-// when standing still, and Flinch() makes the body jerk back when hit. All angles are in GameSettings.
+// when standing still, Flinch() makes the body jerk back when hit, and the body falls over on death.
+// All angles are in GameSettings.
 using UnityEngine;
 
 namespace LastTorch
@@ -16,8 +17,11 @@ namespace LastTorch
         public Transform rightLeg;
         [Tooltip("Holds the torch; kept upright every frame.")]
         public Transform torchHolder;
+        [Tooltip("Root of the visual model; tipped over when the explorer dies.")]
+        public Transform model;
 
         PlayerController controller;
+        PlayerHealth health;
         float phase;
         float moveBlend;
         float flinchTimer;
@@ -27,6 +31,7 @@ namespace LastTorch
         void Awake()
         {
             controller = GetComponent<PlayerController>();
+            health = GetComponent<PlayerHealth>();
             if (hips != null) hipsBasePos = hips.localPosition;
             if (torso != null) torsoBasePos = torso.localPosition;
         }
@@ -83,6 +88,10 @@ namespace LastTorch
             // Keep the torch pointing straight up whatever the arm is doing
             if (torchHolder != null)
                 torchHolder.rotation = Quaternion.Euler(0f, transform.eulerAngles.y, 0f);
+
+            // Out of hearts: fall over backwards
+            if (model != null && health != null && health.IsDead)
+                model.localRotation = Quaternion.RotateTowards(model.localRotation, Quaternion.Euler(-85f, 0f, 0f), s.deathFallSpeed * dt);
         }
     }
 }
