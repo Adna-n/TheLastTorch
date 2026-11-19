@@ -1,0 +1,98 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 36a24cf727f7bc44b8090a4450ff0963, type: 3}
+  m_Name: GameSettings
+  m_EditorClassIdentifier: Assembly-CSharp::LastTorch.GameSettings
+  walkSpeed: 4
+  sprintSpeed: 6.5
+  rotationSpeed: 12
+  gravity: -20
+  groundStickForce: -2
+  strideLength: 1.4
+  footstepVolume: 0.5
+  footstepPitchMin: 0.9
+  footstepPitchMax: 1.1
+  mouseSensitivity: 0.12
+  cameraDistance: 4.5
+  minPitch: -20
+  maxPitch: 60
+  startPitch: 15
+  cameraPivotHeight: 1.6
+  shoulderOffset: 0.45
+  cameraCollisionRadius: 0.3
+  cameraMinDistance: 0.6
+  cameraReturnSpeed: 6
+  shakeFrequency: 25
+  hitShakeIntensity: 0.25
+  hitShakeDuration: 0.25
+  maxFuel: 100
+  burnRatePerSec: 0.8
+  sprintBurnMultiplier: 1.6
+  minLightRange: 4
+  maxLightRange: 14
+  lightIntensity: 3
+  lowFuelWarningPercent: 20
+  torchColor: {r: 1, g: 0.62, b: 0.28, a: 1}
+  flickerSpeed: 9
+  flickerAmount: 0.15
+  minFlameScale: 0.35
+  lowFuelBeatInterval: 1.1
+  torchShadows: 1
+  oilRefillAmount: 25
+  maxHearts: 3
+  invincibilitySeconds: 1.5
+  knockbackForce: 6
+  knockbackDecay: 8
+  blinkInterval: 0.1
+  spikeDownTime: 2
+  spikeWarnTime: 0.5
+  spikeUpTime: 1
+  dartSpeed: 14
+  dartCooldown: 2
+  boulderSpeed: 8
+  collapseDuration: 60
+  debrisPerSecond: 3
+  gemPoints: 10
+  oilPoints: 5
+  keyPoints: 50
+  heartPoints: 200
+  damagePenalty: 20
+  escapeBonusPerSecond: 5
+  torchBonusPerFuel: 1
+  easyBurnMult: 0.7
+  normalBurnMult: 1
+  hardBurnMult: 1.4
+  cellSize: 4
+  wallHeight: 4
+  collectibleBobHeight: 0.15
+  collectibleBobSpeed: 2
+  collectibleSpinSpeed: 90
+  legSwingAngle: 35
+  armSwingAngle: 25
+  torchArmRaiseAngle: 65
+  torchArmSwingFactor: 0.3
+  bodyBobHeight: 0.05
+  moveLeanAngle: 6
+  animBlendSpeed: 6
+  breathSpeed: 1.6
+  breathAmount: 0.012
+  breathSwayAngle: 1.2
+  flinchAngle: 20
+  flinchDuration: 0.3
+  introDuration: 7
+  ambientColor: {r: 0.02, g: 0.02, b: 0.03, a: 1}
+  fogDensity: 0.05
+  musicVolume: 0.5
+  sfxVolume: 1
+  sfxPoolSize: 16
+  sfxMaxDistance: 30
+  enableDebugKeys: 1
