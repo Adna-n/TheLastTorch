@@ -136,6 +136,19 @@ namespace LastTorch
         public int sfxPoolSize = 16;
         public float sfxMaxDistance = 30f;
 
+        [Header("Profile")]
+        public int maxNameLength = 12;
+        public int leaderboardSize = 5;
+
+        [Header("Main Menu")]
+        [Tooltip("How far the menu camera drifts (metres).")]
+        public float menuDriftAmount = 0.12f;
+        public float menuDriftSpeed = 0.12f;
+        [Tooltip("How far the menu camera turns left/right while drifting (degrees).")]
+        public float menuDriftYawDegrees = 0.6f;
+        public float menuTorchIntensity = 2.5f;
+        public float menuTorchRange = 9f;
+
         [Header("Debug")]
         [Tooltip("Enables the debug overlay keys (H = hurt, R = restart). Turn off for the final build.")]
         public bool enableDebugKeys = true;

@@ -47,5 +47,13 @@ Before `ProjectBuilder` exists, drop `-executeMethod ...` to just compile. Batch
 has the project open; in that case ask the user to check the Console.
 Note: Unity 6000.6.0f1 is also installed. Always use **6000.3.24f1** for this project.
 
+## Progress notes
+- Phase 2 also built the **Main Menu** early (user request): `SceneBuilder.BuildMainMenu`, `MainMenuController`,
+  `UIFactory`, `ProfileManager`. `GameManager` already records attempts/results to profiles.
+- **Phase 3 TODO:** set `SceneBuilder.GameSceneName` to `"Temple"`, add Temple to Build Settings, delete
+  `TestSceneBuilder` + `TestScene.unity` + `Test_*` meshes, remove `DebugOverlay` once the HUD exists (Phase 5).
+- Scenes without a GameManager call `GameManager.RegisterSettings(settings)` so `GameManager.Settings` works.
+- Prefab door convention: slab spans local X, player approaches from local -Z (front); ExitGate's outside is +Z.
+
 ## PlayerPrefs keys
 `LT_Profiles`, `LT_Leaderboard` (top 5), `LT_LastName`, `LT_Settings`.

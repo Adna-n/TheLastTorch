@@ -19,7 +19,8 @@ namespace LastTorch.EditorTools
         /// <summary>Plain-colour explorer materials (Phase 2's MaterialFactory may add textures to the same files).</summary>
         public static ExplorerMaterials CreateMaterials()
         {
-            var soft = TextureGenerator.SoftParticle();
+            var soft = TextureGenerator.Load("soft_particle");
+            if (soft == null) soft = TextureGenerator.SoftParticle();
             return new ExplorerMaterials
             {
                 skin = MaterialFactory.Lit("Explorer_Skin", Hex("C68B59"), 0.35f),
@@ -28,7 +29,7 @@ namespace LastTorch.EditorTools
                 hat = MaterialFactory.Lit("Explorer_Hat", Hex("6B4226"), 0.2f),
                 leather = MaterialFactory.Lit("Explorer_Leather", Hex("5A3A22"), 0.35f),
                 boots = MaterialFactory.Lit("Explorer_Boots", Hex("3A2A1E"), 0.3f),
-                wood = MaterialFactory.Lit("Wood", Hex("7A5230"), 0.2f),
+                wood = MaterialFactory.Wood(),
                 eye = MaterialFactory.Lit("Explorer_Eye", Hex("1A1410"), 0.8f),
                 fire = MaterialFactory.Particle("Particle_Fire", soft, new Color(1f, 0.55f, 0.2f, 1f), true),
                 ember = MaterialFactory.Particle("Particle_Ember", soft, new Color(1f, 0.7f, 0.3f, 1f), true),
@@ -137,7 +138,7 @@ namespace LastTorch.EditorTools
             return root;
         }
 
-        static ParticleSystem CreateFlame(Transform parent, Vector3 localPos, Material material)
+        public static ParticleSystem CreateFlame(Transform parent, Vector3 localPos, Material material)
         {
             var go = Empty("Flame", parent, localPos);
             var ps = go.AddComponent<ParticleSystem>();
@@ -184,7 +185,7 @@ namespace LastTorch.EditorTools
             return ps;
         }
 
-        static ParticleSystem CreateEmbers(Transform parent, Vector3 localPos, Material material)
+        public static ParticleSystem CreateEmbers(Transform parent, Vector3 localPos, Material material)
         {
             var go = Empty("Embers", parent, localPos);
             var ps = go.AddComponent<ParticleSystem>();

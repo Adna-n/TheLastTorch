@@ -1,6 +1,6 @@
 // DebugOverlay: a TEMPORARY on-screen readout for testing before the real HUD exists (Phase 5).
 // Shows state, fuel, hearts, keys and score. Debug keys (only if GameSettings.enableDebugKeys):
-// H = hurt yourself, R = restart the scene. Remove it from scenes once the HUD is in.
+// H = hurt yourself, R = restart the scene, M = main menu. Remove it from scenes once the HUD is in.
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -29,6 +29,8 @@ namespace LastTorch
                 health.TakeDamage(1, health.transform.position + health.transform.forward);
             if (kb.rKey.wasPressedThisFrame && GameManager.Instance != null)
                 GameManager.Instance.RestartLevel();
+            if (kb.mKey.wasPressedThisFrame && GameManager.Instance != null)
+                GameManager.Instance.LoadMainMenu();
         }
 
         void OnGUI()
@@ -46,8 +48,9 @@ namespace LastTorch
             if (health != null) text += $"Hearts: {health.Hearts}/{GameManager.Settings.maxHearts}{(health.IsInvincible ? "  (invincible)" : "")}\n";
             if (inventory != null) text += $"Keys: Sun {inventory.HasSun}  Moon {inventory.HasMoon}  Serpent {inventory.HasSerpent}\n";
             if (ScoreManager.Instance != null) text += $"Score: {ScoreManager.Instance.Total}\n";
-            if (GameManager.Settings.enableDebugKeys) text += "[H] hurt  [R] restart  [Esc] pause\n";
-            if (gm != null && gm.IsGameOver) text += $"\n{(gm.State == GameState.Won ? "WON" : "LOST")}: {gm.GameOverReason}\nPress R to restart";
+            text += $"Player: {GameSession.PlayerName}  ({GameSession.Difficulty})\n";
+            if (GameManager.Settings.enableDebugKeys) text += "[H] hurt  [R] restart  [M] main menu  [Esc] pause\n";
+            if (gm != null && gm.IsGameOver) text += $"\n{(gm.State == GameState.Won ? "WON" : "LOST")}: {gm.GameOverReason}\nPress R to restart or M for the main menu";
 
             GUI.Label(new Rect(20, 20, 800, 400), text, style);
         }

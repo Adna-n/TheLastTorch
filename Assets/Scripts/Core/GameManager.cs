@@ -1,7 +1,8 @@
 // GameManager: the "referee" of a scene. Holds the GameSettings, the game state
 // (Intro -> Playing -> Paused -> Collapse -> Won/Lost), the run timer and the difficulty multiplier.
 // Other scripts ask it "is the game running?" and call Win()/Lose(). Esc toggles pause.
-// Raises OnStateChanged and OnGameOver(won, reason) so UI and audio can react.
+// Raises OnStateChanged and OnGameOver(won, reason) so UI and audio can react, and saves each
+// run to the player profile/leaderboard (ProfileManager).
 using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -22,7 +23,17 @@ namespace LastTorch
         public bool playIntro = true;
         public string mainMenuScene = "MainMenu";
 
+        [Tooltip("Count attempts and save results to the player profile / leaderboard.")]
+        public bool recordProfile = true;
+
+        static GameSettings registeredSettings;
         static GameSettings fallbackSettings;
+
+        /// <summary>Lets scenes without a GameManager (the main menu) supply the settings asset.</summary>
+        public static void RegisterSettings(GameSettings value)
+        {
+            if (value != null) registeredSettings = value;
+        }
 
         /// <summary>The active tunables. Falls back to default values if no asset is assigned.</summary>
         public static GameSettings Settings
@@ -30,6 +41,7 @@ namespace LastTorch
             get
             {
                 if (Instance != null && Instance.settings != null) return Instance.settings;
+                if (registeredSettings != null) return registeredSettings;
                 if (fallbackSettings == null)
                 {
                     fallbackSettings = ScriptableObject.CreateInstance<GameSettings>();
@@ -57,6 +69,7 @@ namespace LastTorch
         void Awake()
         {
             Instance = this;
+            RegisterSettings(settings);
             Time.timeScale = 1f;
             State = GameState.Intro;
         }
@@ -65,6 +78,7 @@ namespace LastTorch
         {
             ApplyLighting();
             PlayerOptions.Apply();
+            if (recordProfile) ProfileManager.StartRun(GameSession.PlayerName);
             if (!playIntro) SetState(GameState.Playing);
         }
 
@@ -138,6 +152,13 @@ namespace LastTorch
             GameOverReason = reason;
             SetState(won ? GameState.Won : GameState.Lost);
             Debug.Log($"[GameManager] {(won ? "WON" : "LOST")}: {reason}  (time {RunTime:0.0}s)");
+
+            if (recordProfile)
+            {
+                var score = ScoreManager.Instance;
+                ProfileManager.RecordRun(GameSession.PlayerName, score != null ? score.Total : 0, RunTime, won,
+                    score != null ? score.GemsCollected : 0);
+            }
             OnGameOver?.Invoke(won, reason);
         }
 

@@ -15,6 +15,8 @@ namespace LastTorch
         [Range(0f, 1f)] public float sfxVolume = 1f;
         [Tooltip("Multiplier on GameSettings.mouseSensitivity.")]
         public float mouseSensitivity = 1f;
+        [Tooltip("Difficulty chosen last time in the main menu.")]
+        public Difficulty lastDifficulty = Difficulty.Normal;
 
         static PlayerOptions current;
 
