@@ -1,6 +1,6 @@
 // ProjectBuilder: the "The Last Torch" menu in the Unity top bar.
 // 1. Generate Assets = textures -> meshes -> audio -> materials -> post-FX -> prefabs.
-// 2. Build Scenes = MainMenu (+ the test scene for now) and the Build Settings list.
+// 2. Build Scenes = MainMenu + Temple (from maze.txt) and the Build Settings list.
 // Build All = both. Reset Saved Profiles = delete the LT_ PlayerPrefs keys.
 // BuildAllBatch() is the same as Build All for the command line (-executeMethod).
 using System;
@@ -41,10 +41,10 @@ namespace LastTorch.EditorTools
             try
             {
                 Step("Main Menu", 0.2f); SceneBuilder.BuildMainMenu();
-                Step("Test Scene", 0.6f); TestSceneBuilder.Build();
-                SceneBuilder.SetBuildSettings(SceneBuilder.MainMenuPath, TestSceneBuilder.ScenePath);
+                Step("Temple", 0.5f); SceneBuilder.BuildTemple();
+                SceneBuilder.SetBuildSettings(SceneBuilder.MainMenuPath, SceneBuilder.TemplePath);
                 AssetDatabase.SaveAssets();
-                Debug.Log("[ProjectBuilder] Scenes built. Build Settings: MainMenu (0), TestScene (1).");
+                Debug.Log("[ProjectBuilder] Scenes built. Build Settings: MainMenu (0), Temple (1).");
             }
             finally
             {

@@ -83,6 +83,37 @@ namespace LastTorch
         [Header("Collapse")]
         public float collapseDuration = 60f;
         public float debrisPerSecond = 3f;
+        public float collapseShakeIntensity = 0.06f;
+        [Tooltip("Seconds for the red collapse post-processing to fade in.")]
+        public float collapseVolumeFadeTime = 2f;
+        [Tooltip("Red warning circle shows this long before a rock lands.")]
+        public float debrisWarnTime = 0.8f;
+        public float debrisSpawnRadius = 7f;
+        [Range(0f, 1f)] public float debrisTargetPlayerChance = 0.3f;
+        public float debrisDropHeight = 9f;
+        public float debrisGravity = 30f;
+        [Tooltip("A rock landing closer than this to the player hurts them.")]
+        public float debrisHitRadius = 0.9f;
+
+        [Header("Doors")]
+        [Tooltip("How close the player must be for doors to react / accept E.")]
+        public float doorInteractDistance = 3f;
+        public float doorOpenTime = 1.5f;
+        public float doorShakeIntensity = 0.08f;
+        public float doorShakeDuration = 1.2f;
+        [Tooltip("Seconds after the intro before the entrance slams shut.")]
+        public float entranceSlamDelay = 1.5f;
+        public float entranceSlamDuration = 0.18f;
+        public float slamShakeIntensity = 0.6f;
+        public float slamShakeDuration = 0.7f;
+        public float gateOpenTime = 2f;
+
+        [Header("Heart of Eternity")]
+        public float heartPulseSpeed = 2.5f;
+        [Range(0f, 1f)] public float heartPulseAmount = 0.3f;
+
+        [Header("Hints")]
+        public float hintDuration = 3f;
 
         [Header("Score")]
         public int gemPoints = 10;

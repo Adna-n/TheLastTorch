@@ -1,7 +1,7 @@
 // PrefabFactory: assembles every game object from the generated meshes and materials and saves
 // them as prefabs in Assets/Generated/Prefabs (walls, floor, collectibles, doors, Heart altar,
-// traps, boulder, decorations, and the Player). Door/trap behaviour scripts are added in Phases 3-4;
-// this phase builds their visuals and colliders. Re-running overwrites the prefabs in place.
+// traps, boulder, decorations, effects and the Player) with their behaviour scripts wired up
+// (trap scripts arrive in Phase 4). Re-running overwrites the prefabs in place.
 // Convention for doors: the slab spans local X, the player approaches from local -Z ("front").
 using UnityEditor;
 using UnityEngine;
@@ -105,6 +105,16 @@ namespace LastTorch.EditorTools
                 Save(go, "Floor");
             }
 
+            // ---------------- one-shot effects (used by collectibles, doors and debris)
+            var pickupBurst = BurstPrefab("PickupBurst", "Particle_Ember", 24, 0.4f, 0.8f, 1.5f, 3.5f, 0.06f, 0.14f, 0.4f, false);
+            var dustBurst = BurstPrefab("DustBurst", "Particle_Dust", 30, 1.0f, 1.8f, 0.4f, 2.2f, 0.5f, 1.1f, -0.03f, true);
+            GameObject warningCircle;
+            {
+                var go = new GameObject("WarningCircle");
+                Visual("Circle", go.transform, "Quad", "Particle_Warning", Vector3.zero, Vector3.one, new Vector3(90f, 0f, 0f), false);
+                warningCircle = Save(go, "WarningCircle");
+            }
+
             // ---------------- collectibles
             {
                 var go = new GameObject("OilJar");
@@ -117,6 +127,8 @@ namespace LastTorch.EditorTools
                 col.type = CollectibleType.Oil;
                 col.visual = visual;
                 col.spin = false;
+                col.burstPrefab = pickupBurst;
+                col.burstColor = new Color(1f, 0.6f, 0.2f);
                 Save(go, "OilJar");
             }
             {
@@ -129,11 +141,13 @@ namespace LastTorch.EditorTools
                 var col = go.AddComponent<Collectible>();
                 col.type = CollectibleType.Gem;
                 col.visual = visual;
+                col.burstPrefab = pickupBurst;
+                col.burstColor = new Color(0.5f, 1f, 0.95f);
                 Save(go, "Gem");
             }
-            KeyPrefab("Key_Sun", KeyType.Sun, new Color(1f, 0.6f, 0.24f));
-            KeyPrefab("Key_Moon", KeyType.Moon, new Color(0.75f, 0.85f, 1f));
-            KeyPrefab("Key_Serpent", KeyType.Serpent, new Color(0.36f, 1f, 0.48f));
+            KeyPrefab("Key_Sun", KeyType.Sun, new Color(1f, 0.6f, 0.24f), pickupBurst);
+            KeyPrefab("Key_Moon", KeyType.Moon, new Color(0.75f, 0.85f, 1f), pickupBurst);
+            KeyPrefab("Key_Serpent", KeyType.Serpent, new Color(0.36f, 1f, 0.48f), pickupBurst);
 
             // ---------------- doors
             {
@@ -141,41 +155,69 @@ namespace LastTorch.EditorTools
                 var slab = DoorSlab(go.transform, "Stone_Dark");
                 Visual("Glyph_Front", slab, "Quad", "Key_Sun", new Vector3(0f, h * 0.6f, -0.41f), Vector3.one * 1.4f);
                 Visual("Glyph_Back", slab, "Quad", "Key_Sun", new Vector3(0f, h * 0.6f, 0.41f), Vector3.one * 1.4f, new Vector3(0f, 180f, 0f));
+                var door = go.AddComponent<KeyDoor>();
+                door.slab = slab;
+                door.requiredKey = KeyType.Sun;
                 Save(go, "KeyDoor");
             }
             {
                 var go = new GameObject("SanctumDoor");
                 var slab = DoorSlab(go.transform, "Stone_Dark");
                 string[] keys = { "Sun", "Moon", "Serpent" };
+                var sockets = new Renderer[3];
                 for (int i = 0; i < 3; i++)
                 {
                     float x = (i - 1) * 1.0f;
-                    Visual("Socket_" + keys[i], slab, "Cylinder_12", "Socket_Off", new Vector3(x, 1.6f, -0.42f), new Vector3(0.45f, 0.05f, 0.45f), new Vector3(90f, 0f, 0f));
+                    sockets[i] = Visual("Socket_" + keys[i], slab, "Cylinder_12", "Socket_Off", new Vector3(x, 1.6f, -0.42f), new Vector3(0.45f, 0.05f, 0.45f), new Vector3(90f, 0f, 0f)).GetComponent<Renderer>();
                     Visual("SocketGlyph_" + keys[i], slab, "Quad", "Key_" + keys[i], new Vector3(x, 2.4f, -0.41f), Vector3.one * 0.6f);
                 }
                 Visual("Glyph_Back", slab, "Quad", "Glyph_Wall_1", new Vector3(0f, h * 0.6f, 0.41f), Vector3.one * 1.6f, new Vector3(0f, 180f, 0f));
+                var door = go.AddComponent<SanctumDoor>();
+                door.slab = slab;
+                door.sockets = sockets;
+                door.socketOnMaterial = M("Socket_On");
                 Save(go, "SanctumDoor");
             }
             {
+                // Entrance: starts open with dim daylight outside (local +Z), slams shut after the intro
                 var go = new GameObject("EntranceDoor");
                 var slab = DoorSlab(go.transform, "Stone_Dark");
                 Visual("Glyph_Front", slab, "Quad", "Glyph_Wall_2", new Vector3(0f, h * 0.55f, -0.41f), Vector3.one * 1.6f);
                 Visual("Glyph_Back", slab, "Quad", "Glyph_Wall_2", new Vector3(0f, h * 0.55f, 0.41f), Vector3.one * 1.6f, new Vector3(0f, 180f, 0f));
+                var outside = Outside(go.transform, c, h, false);
+                var light = AddLight(outside, new Vector3(0f, h * 0.6f, c * 0.9f), new Color(1f, 0.9f, 0.72f), 10f, 1.5f, true);
+                light.name = "OutsideLight";
+                // Invisible wall at the doorway's outer edge: the player can't leave before the slam
+                Blocker(outside, new Vector3(0f, h * 0.5f, c * 0.5f), new Vector3(c, h, 0.2f));
+                var door = go.AddComponent<EntranceDoor>();
+                door.slab = slab;
+                door.outsideLight = light;
+                door.dustBurstPrefab = dustBurst;
                 Save(go, "EntranceDoor");
             }
             {
-                // Exit gate + the "outside" behind it (local +Z): sandy floor, side walls, glowing daylight and a warm light
+                // Exit gate + the "outside" behind it (local +Z): sandy floor, side walls, glowing daylight, win trigger
                 var go = new GameObject("ExitGate");
                 var slab = DoorSlab(go.transform, "Stone_Dark");
                 Visual("Glyph_Front", slab, "Quad", "Glyph_Wall_3", new Vector3(0f, h * 0.55f, -0.41f), Vector3.one * 1.6f);
-                var outside = new GameObject("Outside").transform;
-                outside.SetParent(go.transform, false);
-                Visual("SandFloor", outside, "FloorTile", "Sand", new Vector3(0f, 0f, c));
-                Visual("SideWall_L", outside, "WallBlock", "Stone_Wall", new Vector3(-c, 0f, c));
-                Visual("SideWall_R", outside, "WallBlock", "Stone_Wall", new Vector3(c, 0f, c));
-                Visual("DaylightGlow", outside, "Quad", "Daylight", new Vector3(0f, h * 0.5f, c * 1.45f), new Vector3(c * 1.2f, h * 1.2f, 1f), default, false);
+                var outside = Outside(go.transform, c, h, true);
                 var light = AddLight(outside, new Vector3(0f, h * 0.6f, c * 0.9f), new Color(1f, 0.92f, 0.75f), 14f, 4f, true);
                 light.name = "DaylightLight";
+                Blocker(outside, new Vector3(0f, h * 0.5f, c * 1.6f), new Vector3(c, h, 0.2f));
+
+                var trigger = new GameObject("WinTrigger");
+                trigger.transform.SetParent(go.transform, false);
+                var box = trigger.AddComponent<BoxCollider>();
+                box.isTrigger = true;
+                box.center = new Vector3(0f, h * 0.5f, c * 0.9f);
+                box.size = new Vector3(c, h, c * 0.5f);
+                var rb = go.AddComponent<Rigidbody>(); // so the child trigger reports to ExitGate
+                rb.isKinematic = true;
+                rb.useGravity = false;
+
+                var gate = go.AddComponent<ExitGate>();
+                gate.slab = slab;
+                gate.daylight = light;
                 Save(go, "ExitGate");
             }
 
@@ -193,7 +235,7 @@ namespace LastTorch.EditorTools
                 var visual = new GameObject("Visual").transform;
                 visual.SetParent(heart.transform, false);
                 Visual("Crystal", visual, "Heart_Crystal", "Heart", Vector3.zero, Vector3.one * 0.6f, default, false);
-                AddLight(heart.transform, Vector3.zero, EditorUtil.Hex("2EE6D6"), 8f, 3f, false);
+                var glow = AddLight(heart.transform, Vector3.zero, EditorUtil.Hex("2EE6D6"), 8f, 3f, false);
                 var hum = heart.AddComponent<AudioSource>();
                 hum.clip = AudioGenerator.Load("heart_hum");
                 hum.loop = true;
@@ -207,6 +249,9 @@ namespace LastTorch.EditorTools
                 var col = heart.AddComponent<Collectible>();
                 col.type = CollectibleType.Heart;
                 col.visual = visual;
+                col.burstPrefab = pickupBurst;
+                col.burstColor = EditorUtil.Hex("2EE6D6");
+                heart.AddComponent<HeartOfEternity>().glow = glow;
                 Save(go, "HeartAltar");
             }
 
@@ -269,9 +314,13 @@ namespace LastTorch.EditorTools
                 Save(go, "Boulder");
             }
             {
+                // Falling rock (no collider: it damages by distance on impact, so it never shoves the player)
                 var go = new GameObject("Debris");
-                Visual("Mesh", go.transform, "Rock_0", "Rock", Vector3.zero, Vector3.one * 0.7f);
-                go.AddComponent<SphereCollider>().radius = 0.3f;
+                var rock = Visual("Mesh", go.transform, "Rock_0", "Rock", Vector3.zero, Vector3.one * 0.7f);
+                var debris = go.AddComponent<FallingDebris>();
+                debris.rock = rock.transform;
+                debris.warningPrefab = warningCircle;
+                debris.dustBurstPrefab = dustBurst;
                 Save(go, "Debris");
             }
 
@@ -331,7 +380,71 @@ namespace LastTorch.EditorTools
             return slab;
         }
 
-        static void KeyPrefab(string name, KeyType key, Color glow)
+        /// <summary>The bit of "outside" behind an entrance/exit (local +Z): sand floor (walkable), side walls.</summary>
+        static Transform Outside(Transform root, float c, float h, bool daylightGlow)
+        {
+            var outside = new GameObject("Outside").transform;
+            outside.SetParent(root, false);
+            var sand = Visual("SandFloor", outside, "FloorTile", "Sand", new Vector3(0f, 0f, c));
+            var col = sand.AddComponent<BoxCollider>();
+            col.center = new Vector3(0f, -0.1f, 0f);
+            col.size = new Vector3(c, 0.2f, c);
+            Visual("SideWall_L", outside, "WallBlock", "Stone_Wall", new Vector3(-c, 0f, c));
+            Visual("SideWall_R", outside, "WallBlock", "Stone_Wall", new Vector3(c, 0f, c));
+            if (daylightGlow)
+                Visual("DaylightGlow", outside, "Quad", "Daylight", new Vector3(0f, h * 0.5f, c * 1.45f), new Vector3(c * 1.2f, h * 1.2f, 1f), default, false);
+            return outside;
+        }
+
+        static void Blocker(Transform parent, Vector3 center, Vector3 size)
+        {
+            var go = new GameObject("Blocker");
+            go.transform.SetParent(parent, false);
+            var box = go.AddComponent<BoxCollider>();
+            box.center = center;
+            box.size = size;
+        }
+
+        /// <summary>A one-shot particle burst prefab (does not play until Effects.Spawn calls Play).</summary>
+        static GameObject BurstPrefab(string name, string material, int count, float lifeMin, float lifeMax,
+            float speedMin, float speedMax, float sizeMin, float sizeMax, float gravity, bool grow)
+        {
+            var go = new GameObject(name);
+            var ps = go.AddComponent<ParticleSystem>();
+            ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            var main = ps.main;
+            main.playOnAwake = false;
+            main.loop = false;
+            main.duration = lifeMax;
+            main.startLifetime = new ParticleSystem.MinMaxCurve(lifeMin, lifeMax);
+            main.startSpeed = new ParticleSystem.MinMaxCurve(speedMin, speedMax);
+            main.startSize = new ParticleSystem.MinMaxCurve(sizeMin, sizeMax);
+            main.gravityModifier = gravity;
+            main.stopAction = ParticleSystemStopAction.Destroy;
+            main.simulationSpace = ParticleSystemSimulationSpace.World;
+            var emission = ps.emission;
+            emission.rateOverTime = 0f;
+            emission.SetBursts(new[] { new ParticleSystem.Burst(0f, (short)count) });
+            var shape = ps.shape;
+            shape.shapeType = ParticleSystemShapeType.Sphere;
+            shape.radius = 0.25f;
+            var col = ps.colorOverLifetime;
+            col.enabled = true;
+            var grad = new Gradient();
+            grad.SetKeys(new[] { new GradientColorKey(Color.white, 0f), new GradientColorKey(Color.white, 1f) },
+                new[] { new GradientAlphaKey(1f, 0f), new GradientAlphaKey(0.8f, 0.4f), new GradientAlphaKey(0f, 1f) });
+            col.color = new ParticleSystem.MinMaxGradient(grad);
+            var size = ps.sizeOverLifetime;
+            size.enabled = true;
+            size.size = new ParticleSystem.MinMaxCurve(1f, grow ? AnimationCurve.Linear(0f, 0.6f, 1f, 1.6f) : AnimationCurve.Linear(0f, 1f, 1f, 0.2f));
+            var r = go.GetComponent<ParticleSystemRenderer>();
+            r.sharedMaterial = M(material);
+            r.shadowCastingMode = ShadowCastingMode.Off;
+            r.receiveShadows = false;
+            return Save(go, name);
+        }
+
+        static void KeyPrefab(string name, KeyType key, Color glow, GameObject burst)
         {
             var go = new GameObject(name);
             var visual = new GameObject("Visual").transform;
@@ -346,6 +459,8 @@ namespace LastTorch.EditorTools
             col.type = CollectibleType.Key;
             col.keyType = key;
             col.visual = visual;
+            col.burstPrefab = burst;
+            col.burstColor = glow;
             Save(go, name);
         }
     }

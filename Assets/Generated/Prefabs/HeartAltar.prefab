@@ -377,6 +377,7 @@ GameObject:
   - component: {fileID: 4756954104610568729}
   - component: {fileID: 7462506928044347346}
   - component: {fileID: 3556486130928856971}
+  - component: {fileID: 7798850414915017538}
   m_Layer: 0
   m_Name: Heart
   m_TagString: Untagged
@@ -562,3 +563,18 @@ MonoBehaviour:
   keyType: 0
   visual: {fileID: 1413420504761298426}
   spin: 1
+  burstPrefab: {fileID: 368234505876307314, guid: e1adfa482284c3c4ca46e6f42e9d63db, type: 3}
+  burstColor: {r: 0.18039216, g: 0.9019608, b: 0.8392157, a: 1}
+--- !u!114 &7798850414915017538
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9048433880212876817}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cae8872bdd014c3488cea9b8d3c5cd3f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LastTorch.HeartOfEternity
+  glow: {fileID: 2388351114672181972}

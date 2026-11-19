@@ -411,6 +411,8 @@ MonoBehaviour:
   keyType: 2
   visual: {fileID: 7734968493288515581}
   spin: 1
+  burstPrefab: {fileID: 368234505876307314, guid: e1adfa482284c3c4ca46e6f42e9d63db, type: 3}
+  burstColor: {r: 0.36, g: 1, b: 0.48, a: 1}
 --- !u!1 &7540672819368064564
 GameObject:
   m_ObjectHideFlags: 0

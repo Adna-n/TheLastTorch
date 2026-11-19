@@ -2,7 +2,8 @@
 // BuildMainMenu() creates Assets/Scenes/MainMenu.unity: a torch-lit stone wall (two flickering
 // torches, glyphs, vines, pillars, drifting camera, post-processing, ambient drone) and the full
 // menu UI (title, name input, difficulty, Play / How to Play / Leaderboard / Settings / Quit).
-// The Temple level scene is added here in Phase 3.
+// BuildTemple() creates Assets/Scenes/Temple.unity: the maze from LevelBuilder, the player and
+// camera, darkness + fog, post-processing volumes and the managers (game, score, collapse, audio).
 using System.Linq;
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -17,8 +18,9 @@ namespace LastTorch.EditorTools
     public static class SceneBuilder
     {
         public const string MainMenuPath = "Assets/Scenes/MainMenu.unity";
-        /// <summary>Scene the Play button loads. Temporary test scene until the Temple is built in Phase 3.</summary>
-        public const string GameSceneName = "TestScene";
+        public const string TemplePath = "Assets/Scenes/Temple.unity";
+        /// <summary>Scene the Play button loads.</summary>
+        public const string GameSceneName = "Temple";
 
         static readonly Color Orange = Hex("FF9A3C");
         static readonly Color Parchment = Hex("E8DCC0");
@@ -80,6 +82,47 @@ namespace LastTorch.EditorTools
                 .Where(p => System.IO.File.Exists(p))
                 .Select(p => new EditorBuildSettingsScene(p, true))
                 .ToArray();
+        }
+
+        // ------------------------------------------------------------------ temple (the level)
+
+        public static void BuildTemple()
+        {
+            var settings = GameSettingsAsset.GetOrCreate();
+            var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+            SetupDarkness(settings.ambientColor, settings.fogDensity);
+
+            // Level from maze.txt
+            var levelRoot = new GameObject("Level").transform;
+            var info = LevelBuilder.Build(settings, levelRoot);
+
+            // Player + third-person camera
+            var player = Instantiate("Player", info.spawnPosition, info.spawnRotation);
+            var camPos = info.spawnPosition + info.spawnRotation * new Vector3(0f, 2.5f, -settings.cameraDistance);
+            var cam = CreateCamera(camPos, info.spawnRotation, 60f);
+            cam.gameObject.AddComponent<CameraShake>();
+            cam.gameObject.AddComponent<ThirdPersonCamera>().target = player.transform;
+            player.GetComponent<PlayerController>().cameraTransform = cam.transform;
+
+            // Post-processing
+            PostFXBuilder.CreateVolume("Global Volume", PostFXBuilder.LoadGlobal(), 1f, 0f);
+            var collapseVolume = PostFXBuilder.CreateVolume("Collapse Volume", PostFXBuilder.LoadCollapse(), 0f, 1f);
+
+            // Managers
+            var managers = new GameObject("GameManager");
+            var gm = managers.AddComponent<GameManager>();
+            gm.settings = settings;
+            gm.playIntro = true;
+            managers.AddComponent<ScoreManager>();
+            var collapse = managers.AddComponent<CollapseSequence>();
+            collapse.collapseVolume = collapseVolume;
+            collapse.exitGate = info.exitGate;
+            collapse.debrisPrefab = PrefabFactory.Load("Debris");
+            var audio = CreateAudioManager(managers.transform);
+            audio.startLoop = SoundId.AmbientDrone;
+            managers.AddComponent<DebugOverlay>(); // temporary until the HUD (Phase 5)
+
+            EditorSceneManager.SaveScene(scene, TemplePath);
         }
 
         // ------------------------------------------------------------------ main menu

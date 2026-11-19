@@ -50,8 +50,10 @@ Note: Unity 6000.6.0f1 is also installed. Always use **6000.3.24f1** for this pr
 ## Progress notes
 - Phase 2 also built the **Main Menu** early (user request): `SceneBuilder.BuildMainMenu`, `MainMenuController`,
   `UIFactory`, `ProfileManager`. `GameManager` already records attempts/results to profiles.
-- **Phase 3 TODO:** set `SceneBuilder.GameSceneName` to `"Temple"`, add Temple to Build Settings, delete
-  `TestSceneBuilder` + `TestScene.unity` + `Test_*` meshes, remove `DebugOverlay` once the HUD exists (Phase 5).
+- Phase 3 done: Temple scene from `LevelBuilder` (maze.txt synced root -> Assets/Resources, newest wins).
+  Test scene removed. Hints go through `GameManager.ShowHint` / `OnHint`; `DebugOverlay` displays them,
+  the collapse timer and intro text until the HUD exists — **remove DebugOverlay in Phase 5**.
+- **Phase 4 TODO:** trap chars `^ T B b` are plain floor in `LevelBuilder.Build` (see the switch comment).
 - Scenes without a GameManager call `GameManager.RegisterSettings(settings)` so `GameManager.Settings` works.
 - Prefab door convention: slab spans local X, player approaches from local -Z (front); ExitGate's outside is +Z.
 

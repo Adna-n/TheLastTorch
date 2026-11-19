@@ -99,7 +99,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3929943485257122752}
-  - component: {fileID: 6068538086522851994}
+  - component: {fileID: 4929400476774271362}
   m_Layer: 0
   m_Name: Debris
   m_TagString: Untagged
@@ -123,24 +123,18 @@ Transform:
   - {fileID: 8964914454423081063}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!135 &6068538086522851994
-SphereCollider:
+--- !u!114 &4929400476774271362
+MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7075313002547792570}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
   m_Enabled: 1
-  serializedVersion: 3
-  m_Radius: 0.3
-  m_Center: {x: 0, y: 0, z: 0}
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 69660c5148340694bbba0b0f9f75d2ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LastTorch.FallingDebris
+  rock: {fileID: 8964914454423081063}
+  warningPrefab: {fileID: 5355442122819288938, guid: 48208702b5e9797499ab8b53430e7fd8, type: 3}
+  dustBurstPrefab: {fileID: 4662194897986606943, guid: 82a0953a8aeede0498a621e54d69c8d5, type: 3}

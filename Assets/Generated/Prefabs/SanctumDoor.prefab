@@ -668,6 +668,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8269856279199388009}
+  - component: {fileID: 6088372727907006848}
   m_Layer: 0
   m_Name: SanctumDoor
   m_TagString: Untagged
@@ -691,6 +692,24 @@ Transform:
   - {fileID: 5927671503631105835}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6088372727907006848
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6682966169427621719}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 942addb7dd5d7cc4882a0e07d086333f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LastTorch.SanctumDoor
+  slab: {fileID: 5927671503631105835}
+  sockets:
+  - {fileID: 6205887433788143020}
+  - {fileID: 2277662407416175785}
+  - {fileID: 7212752964298137848}
+  socketOnMaterial: {fileID: 2100000, guid: 0fff667e2453f9449a888651d58ae206, type: 2}
 --- !u!1 &9103335117008970868
 GameObject:
   m_ObjectHideFlags: 0

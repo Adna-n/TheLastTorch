@@ -221,3 +221,5 @@ MonoBehaviour:
   keyType: 0
   visual: {fileID: 3787466690440756740}
   spin: 1
+  burstPrefab: {fileID: 368234505876307314, guid: e1adfa482284c3c4ca46e6f42e9d63db, type: 3}
+  burstColor: {r: 0.5, g: 1, b: 0.95, a: 1}

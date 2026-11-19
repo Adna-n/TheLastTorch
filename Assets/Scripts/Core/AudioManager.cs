@@ -29,6 +29,8 @@ namespace LastTorch
         public static AudioManager Instance { get; private set; }
 
         public List<SoundEntry> sounds = new List<SoundEntry>();
+        [Tooltip("Loop started automatically when the scene begins (e.g. the ambient drone).")]
+        public SoundId startLoop = SoundId.None;
 
         readonly Dictionary<SoundId, SoundEntry> lookup = new Dictionary<SoundId, SoundEntry>();
         AudioSource[] pool;
@@ -59,6 +61,11 @@ namespace LastTorch
             loopSource.playOnAwake = false;
             loopSource.loop = true;
             loopSource.spatialBlend = 0f;
+        }
+
+        void Start()
+        {
+            if (startLoop != SoundId.None) PlayLoop(startLoop);
         }
 
         void OnDestroy() { if (Instance == this) Instance = null; }

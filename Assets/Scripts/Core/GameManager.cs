@@ -62,6 +62,21 @@ namespace LastTorch
 
         public event Action<GameState> OnStateChanged;
         public event Action<bool, string> OnGameOver;
+        /// <summary>A short message for the player ("Sealed. Needs the Sun Key."), shown by the HUD.</summary>
+        public event Action<string> OnHint;
+
+        public string CurrentHint { get; private set; }
+        float hintExpiry;
+
+        /// <summary>The hint to display right now, or null when it has expired.</summary>
+        public string ActiveHint => Time.time < hintExpiry ? CurrentHint : null;
+
+        public void ShowHint(string text, float duration = -1f)
+        {
+            CurrentHint = text;
+            hintExpiry = Time.time + (duration > 0f ? duration : Settings.hintDuration);
+            OnHint?.Invoke(text);
+        }
 
         GameState stateBeforePause;
         float introTimer;
