@@ -43,7 +43,8 @@ namespace LastTorch.EditorTools
             Box("PillarBase", new Vector3(1.0f, 0.25f, 1.0f), new Vector3(0f, 0.125f, 0f));
         }
 
-        public static Mesh Load(string name) => AssetDatabase.LoadAssetAtPath<Mesh>($"{Folder}/{name}.asset");
+        public static string PathOf(string name) => $"{Folder}/{AssetCategories.Mesh(name)}/{name}.asset";
+        public static Mesh Load(string name) => AssetDatabase.LoadAssetAtPath<Mesh>(PathOf(name));
 
         // ------------------------------------------------------------------ builder
 
@@ -217,8 +218,8 @@ namespace LastTorch.EditorTools
         /// <summary>Saves the mesh as Folder/name.asset (updates the existing asset so prefab links survive).</summary>
         public static Mesh Save(Mesh mesh)
         {
-            EditorUtil.EnsureFolder(Folder);
-            string path = $"{Folder}/{mesh.name}.asset";
+            EditorUtil.EnsureFolder($"{Folder}/{AssetCategories.Mesh(mesh.name)}");
+            string path = PathOf(mesh.name);
             var existing = AssetDatabase.LoadAssetAtPath<Mesh>(path);
             if (existing != null)
             {

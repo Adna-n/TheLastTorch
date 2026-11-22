@@ -31,8 +31,9 @@ namespace LastTorch.EditorTools
             UiHeart();
         }
 
-        public static Texture2D Load(string name) => AssetDatabase.LoadAssetAtPath<Texture2D>($"{Folder}/{name}.png");
-        public static Sprite LoadSprite(string name) => AssetDatabase.LoadAssetAtPath<Sprite>($"{Folder}/{name}.png");
+        public static string PathOf(string name) => $"{Folder}/{AssetCategories.Texture(name)}/{name}.png";
+        public static Texture2D Load(string name) => AssetDatabase.LoadAssetAtPath<Texture2D>(PathOf(name));
+        public static Sprite LoadSprite(string name) => AssetDatabase.LoadAssetAtPath<Sprite>(PathOf(name));
 
         // ------------------------------------------------------------------ noise
 
@@ -531,8 +532,8 @@ namespace LastTorch.EditorTools
         public static Texture2D SavePng(Texture2D tex, string name, bool clamp, bool isNormalMap = false,
             bool sprite = false, Vector4 spriteBorder = default)
         {
-            EditorUtil.EnsureFolder(Folder);
-            string assetPath = $"{Folder}/{name}.png";
+            EditorUtil.EnsureFolder($"{Folder}/{AssetCategories.Texture(name)}");
+            string assetPath = PathOf(name);
             string fullPath = Path.Combine(Path.GetDirectoryName(Application.dataPath), assetPath);
             File.WriteAllBytes(fullPath, tex.EncodeToPNG());
             Object.DestroyImmediate(tex);

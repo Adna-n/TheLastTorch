@@ -78,7 +78,7 @@ namespace LastTorch
         {
             int count = Physics.SphereCastNonAlloc(origin, radius, dir, hits, maxDistance, collisionMask, QueryTriggerInteraction.Ignore);
             float best = maxDistance;
-            Transform root = target.root;
+            Transform root = target; // the player object (its children are the body parts)
             for (int i = 0; i < count; i++)
             {
                 var hit = hits[i];

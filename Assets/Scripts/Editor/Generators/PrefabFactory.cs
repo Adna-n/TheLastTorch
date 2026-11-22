@@ -13,7 +13,8 @@ namespace LastTorch.EditorTools
     {
         public const string Folder = "Assets/Generated/Prefabs";
 
-        public static GameObject Load(string name) => AssetDatabase.LoadAssetAtPath<GameObject>($"{Folder}/{name}.prefab");
+        public static string PathOf(string name) => $"{Folder}/{AssetCategories.Prefab(name)}/{name}.prefab";
+        public static GameObject Load(string name) => AssetDatabase.LoadAssetAtPath<GameObject>(PathOf(name));
 
         static Material M(string name)
         {
@@ -47,8 +48,8 @@ namespace LastTorch.EditorTools
 
         static GameObject Save(GameObject go, string name)
         {
-            EditorUtil.EnsureFolder(Folder);
-            var prefab = PrefabUtility.SaveAsPrefabAsset(go, $"{Folder}/{name}.prefab");
+            EditorUtil.EnsureFolder($"{Folder}/{AssetCategories.Prefab(name)}");
+            var prefab = PrefabUtility.SaveAsPrefabAsset(go, PathOf(name));
             Object.DestroyImmediate(go);
             return prefab;
         }

@@ -40,7 +40,8 @@ namespace LastTorch.EditorTools
             UiHover();
         }
 
-        public static AudioClip Load(string name) => AssetDatabase.LoadAssetAtPath<AudioClip>($"{Folder}/{name}.wav");
+        public static string PathOf(string name) => $"{Folder}/{AssetCategories.Audio(name)}/{name}.wav";
+        public static AudioClip Load(string name) => AssetDatabase.LoadAssetAtPath<AudioClip>(PathOf(name));
 
         /// <summary>The SoundId -> clip table given to every scene's AudioManager.</summary>
         public static List<SoundEntry> BuildSoundList()
@@ -161,8 +162,8 @@ namespace LastTorch.EditorTools
             foreach (float s in samples) max = Mathf.Max(max, Mathf.Abs(s));
             float gain = peak / max;
 
-            EditorUtil.EnsureFolder(Folder);
-            string assetPath = $"{Folder}/{name}.wav";
+            EditorUtil.EnsureFolder($"{Folder}/{AssetCategories.Audio(name)}");
+            string assetPath = PathOf(name);
             string fullPath = Path.Combine(Path.GetDirectoryName(Application.dataPath), assetPath);
 
             using (var fs = new FileStream(fullPath, FileMode.Create))

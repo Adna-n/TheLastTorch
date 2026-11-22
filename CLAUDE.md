@@ -29,9 +29,15 @@ The full spec is in `THE_LAST_TORCH_PLAN.md` (read it before working). The level
 - Scenes: `Assets/Scenes/MainMenu.unity` (build index 0) and `Assets/Scenes/Temple.unity`.
 
 ## Folders
-`Assets/Scripts/{Core,Player,World,Traps,UI,Profile,Editor}`,
-`Assets/Generated/{Textures,Meshes,Materials,Audio,Prefabs,PostFX}`, `Assets/Settings`,
-`Assets/Resources`, `Assets/Scenes`.
+- `Assets/Scripts/{Core,Player,World,Traps,UI,Profile}` (runtime) and
+  `Assets/Scripts/Editor/{Generators,Builders,Utilities}` (editor-only).
+- `Assets/Generated/<Type>/<Category>/` — categories come from `Editor/Utilities/AssetCategories.cs`
+  (e.g. `Prefabs/Doors`, `Materials/Glowing`, `Textures/Glyphs`, `Audio/Loops`). Always load/save via each
+  generator's `PathOf(name)` / `Load(name)`, never a hard-coded path. `Generated/PostFX` has no categories.
+- `Assets/Settings/GameSettings.asset` + `Assets/Settings/Rendering/` (URP assets), `Assets/Resources`, `Assets/Scenes`.
+- Scene Hierarchy is grouped by `SceneBuilder.Organize(...)`: Managers / Camera & Player / World / Lighting & Effects / UI.
+  If you add a top-level object to a scene, add its name to the matching `Organize` section.
+- `EditorStartup` opens MainMenu when the editor starts on an empty Untitled scene.
 
 ## Editor menu: "The Last Torch"
 `1. Generate Assets` · `2. Build Scenes` · `Build All (1 + 2)` · `3. Build Windows EXE` · `Reset Saved Profiles`.

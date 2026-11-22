@@ -76,6 +76,26 @@ namespace LastTorch.EditorTools
             return go;
         }
 
+        /// <summary>
+        /// Tidies the Hierarchy: creates one parent per section (in this order) and moves the named
+        /// top-level objects under it, e.g. ("Managers", "GameManager", "AudioManager").
+        /// </summary>
+        public static void Organize(params (string section, string[] objects)[] sections)
+        {
+            var roots = UnityEngine.SceneManagement.SceneManager.GetActiveScene().GetRootGameObjects();
+            for (int i = 0; i < sections.Length; i++)
+            {
+                var parent = new GameObject(sections[i].section).transform;
+                parent.SetSiblingIndex(i);
+                foreach (string name in sections[i].objects)
+                {
+                    var go = roots.FirstOrDefault(r => r.name == name);
+                    if (go != null) go.transform.SetParent(parent, true);
+                    else Debug.LogWarning($"[SceneBuilder] Organize: '{name}' not found.");
+                }
+            }
+        }
+
         public static void SetBuildSettings(params string[] scenePaths)
         {
             EditorBuildSettings.scenes = scenePaths
@@ -118,10 +138,17 @@ namespace LastTorch.EditorTools
             collapse.collapseVolume = collapseVolume;
             collapse.exitGate = info.exitGate;
             collapse.debrisPrefab = PrefabFactory.Load("Debris");
-            var audio = CreateAudioManager(managers.transform);
+            var audio = CreateAudioManager();
             audio.startLoop = SoundId.AmbientDrone;
 
             BuildTempleUI();
+
+            Organize(
+                ("Managers", new[] { "GameManager", "AudioManager" }),
+                ("Camera & Player", new[] { "Main Camera", "Player" }),
+                ("World", new[] { "Level" }),
+                ("Lighting & Effects", new[] { "Global Volume", "Collapse Volume" }),
+                ("UI", new[] { "GameCanvas", "EventSystem", "UI Controllers" }));
 
             EditorSceneManager.SaveScene(scene, TemplePath);
         }
@@ -141,7 +168,7 @@ namespace LastTorch.EditorTools
             var canvas = UIFactory.CreateCanvas("GameCanvas").transform;
             UIFactory.CreateEventSystem();
 
-            var ui = new GameObject("UI");
+            var ui = new GameObject("UI Controllers");
             ui.AddComponent<HUDController>().Build(skin, canvas);
             ui.AddComponent<EndScreen>().Build(skin, canvas);
             ui.AddComponent<PauseMenu>().Build(skin, canvas);
@@ -166,6 +193,13 @@ namespace LastTorch.EditorTools
             CreateAudioManager();
 
             BuildMenuUI(settings);
+
+            Organize(
+                ("Managers", new[] { "Main Menu Controller", "AudioManager" }),
+                ("Camera", new[] { "Main Camera" }),
+                ("World", new[] { "MenuBackground" }),
+                ("Lighting & Effects", new[] { "Global Volume" }),
+                ("UI", new[] { "MenuCanvas", "EventSystem" }));
 
             EditorSceneManager.SaveScene(scene, MainMenuPath);
         }
@@ -420,7 +454,7 @@ namespace LastTorch.EditorTools
             }
 
             // ---- Controller
-            var controllerGo = new GameObject("MainMenu");
+            var controllerGo = new GameObject("Main Menu Controller");
             var ctrl = controllerGo.AddComponent<MainMenuController>();
             ctrl.settings = settings;
             ctrl.gameScene = GameSceneName;

@@ -17,7 +17,8 @@ namespace LastTorch.EditorTools
         const string LitShaderName = "Universal Render Pipeline/Lit";
         const string ParticleShaderName = "Universal Render Pipeline/Particles/Unlit";
 
-        public static Material Load(string name) => AssetDatabase.LoadAssetAtPath<Material>($"{Folder}/{name}.mat");
+        public static string PathOf(string name) => $"{Folder}/{AssetCategories.Material(name)}/{name}.mat";
+        public static Material Load(string name) => AssetDatabase.LoadAssetAtPath<Material>(PathOf(name));
 
         public static void GenerateAll()
         {
@@ -84,9 +85,9 @@ namespace LastTorch.EditorTools
         /// <summary>Loads Folder/name.mat or creates it with the given shader.</summary>
         public static Material GetOrCreate(string name, string shaderName)
         {
-            EnsureFolder(Folder);
+            EnsureFolder($"{Folder}/{AssetCategories.Material(name)}");
             var shader = FindShader(shaderName);
-            string path = $"{Folder}/{name}.mat";
+            string path = PathOf(name);
             var mat = AssetDatabase.LoadAssetAtPath<Material>(path);
             if (mat == null)
             {

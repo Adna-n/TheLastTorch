@@ -120,6 +120,13 @@ namespace LastTorch.EditorTools
             traps.SetParent(root, false);
             Vector2Int boulderCell = new Vector2Int(-1, -1), triggerCell = new Vector2Int(-1, -1);
 
+            var oilGroup = Group(items, "Oil Jars");
+            var gemGroup = Group(items, "Gems");
+            var keyGroup = Group(items, "Keys");
+            var spikeGroup = Group(traps, "Spike Tiles");
+            var dartGroup = Group(traps, "Dart Plates");
+            int spikes = 0, plates = 0;
+
             for (int r = 0; r < grid.rows; r++)
             {
                 for (int col = 0; col < grid.cols; col++)
@@ -128,31 +135,31 @@ namespace LastTorch.EditorTools
                     Vector3 pos = grid.World(r, col);
                     switch (ch)
                     {
-                        case 'O': SceneBuilder.Instantiate("OilJar", pos, Quaternion.identity, items); info.oilJars++; break;
-                        case 'g': SceneBuilder.Instantiate("Gem", pos, Quaternion.identity, items); info.gems++; break;
-                        case '1': SceneBuilder.Instantiate("Key_Sun", pos, Quaternion.identity, items); info.keys++; break;
-                        case '2': SceneBuilder.Instantiate("Key_Moon", pos, Quaternion.identity, items); info.keys++; break;
-                        case '3': SceneBuilder.Instantiate("Key_Serpent", pos, Quaternion.identity, items); info.keys++; break;
-                        case '*': SceneBuilder.Instantiate("HeartAltar", pos, Quaternion.identity, items); break;
+                        case 'O': Place("OilJar", pos, Quaternion.identity, oilGroup, "Oil Jar " + (++info.oilJars)); break;
+                        case 'g': Place("Gem", pos, Quaternion.identity, gemGroup, "Gem " + (++info.gems)); break;
+                        case '1': Place("Key_Sun", pos, Quaternion.identity, keyGroup, "Sun Key"); info.keys++; break;
+                        case '2': Place("Key_Moon", pos, Quaternion.identity, keyGroup, "Moon Key"); info.keys++; break;
+                        case '3': Place("Key_Serpent", pos, Quaternion.identity, keyGroup, "Serpent Key"); info.keys++; break;
+                        case '*': Place("HeartAltar", pos, Quaternion.identity, items, "Heart of Eternity (Altar)"); break;
                         case 'A':
                         {
-                            var door = SceneBuilder.Instantiate("KeyDoor", pos, DoorRotation(grid, r, col, reachable), doors);
+                            var door = Place("KeyDoor", pos, DoorRotation(grid, r, col, reachable), doors, "Door A (needs Sun Key)");
                             door.GetComponent<KeyDoor>().requiredKey = KeyType.Sun;
                             break;
                         }
-                        case 'H': SceneBuilder.Instantiate("SanctumDoor", pos, DoorRotation(grid, r, col, reachable), doors); break;
-                        case 'D': SceneBuilder.Instantiate("EntranceDoor", pos, DoorRotation(grid, r, col, null), doors); break;
+                        case 'H': Place("SanctumDoor", pos, DoorRotation(grid, r, col, reachable), doors, "Sanctum Door (3 keys)"); break;
+                        case 'D': Place("EntranceDoor", pos, DoorRotation(grid, r, col, null), doors, "Entrance Door"); break;
                         case 'X':
-                            info.exitGate = SceneBuilder.Instantiate("ExitGate", pos, DoorRotation(grid, r, col, null), doors).GetComponent<ExitGate>();
+                            info.exitGate = Place("ExitGate", pos, DoorRotation(grid, r, col, null), doors, "Exit Gate").GetComponent<ExitGate>();
                             break;
-                        case '^': SceneBuilder.Instantiate("SpikeTile", pos, Quaternion.identity, traps); break;
-                        case 'T': BuildDartTrap(grid, r, col, s, traps); break;
+                        case '^': Place("SpikeTile", pos, Quaternion.identity, spikeGroup, "Spike Tile " + (++spikes)); break;
+                        case 'T': BuildDartTrap(grid, r, col, s, dartGroup).name = "Dart Plate " + (++plates); break;
                         case 'B': boulderCell = new Vector2Int(r, col); break;
                         case 'b': triggerCell = new Vector2Int(r, col); break;
                     }
                 }
             }
-            if (boulderCell.x >= 0 && triggerCell.x >= 0) BuildBoulderTrap(grid, boulderCell, triggerCell, traps);
+            if (boulderCell.x >= 0 && triggerCell.x >= 0) BuildBoulderTrap(grid, boulderCell, triggerCell, Group(traps, "Boulder"));
 
             Decorate(grid, faces, rnd, s, root);
             CheckReachability(grid, spawn);
@@ -161,8 +168,24 @@ namespace LastTorch.EditorTools
             return info;
         }
 
+        /// <summary>An empty parent object used to group things in the Hierarchy.</summary>
+        static Transform Group(Transform parent, string name)
+        {
+            var go = new GameObject(name);
+            go.transform.SetParent(parent, false);
+            return go.transform;
+        }
+
+        /// <summary>Instantiates a prefab with a readable Hierarchy name.</summary>
+        static GameObject Place(string prefab, Vector3 pos, Quaternion rot, Transform parent, string name)
+        {
+            var go = SceneBuilder.Instantiate(prefab, pos, rot, parent);
+            go.name = name;
+            return go;
+        }
+
         /// <summary>Pressure plate + a dart launcher on every wall face around the tile (firing across it).</summary>
-        static void BuildDartTrap(Grid grid, int r, int col, GameSettings s, Transform parent)
+        static GameObject BuildDartTrap(Grid grid, int r, int col, GameSettings s, Transform parent)
         {
             Vector3 pos = grid.World(r, col);
             var plate = SceneBuilder.Instantiate("DartPlate", pos, Quaternion.identity, parent);
@@ -172,10 +195,11 @@ namespace LastTorch.EditorTools
                 if (!grid.IsWall(r + d.x, col + d.y)) continue;
                 Vector3 toWall = Grid.DirToWorld(d);
                 Vector3 lp = pos + toWall * (grid.size * 0.5f) + Vector3.up * s.dartLauncherHeight;
-                var launcher = SceneBuilder.Instantiate("DartLauncher", lp, Quaternion.LookRotation(-toWall), plate.transform);
+                var launcher = Place("DartLauncher", lp, Quaternion.LookRotation(-toWall), plate.transform, "Launcher " + (launchers.Count + 1));
                 launchers.Add(launcher.transform);
             }
             plate.GetComponent<DartTrap>().launchers = launchers.ToArray();
+            return plate;
         }
 
         /// <summary>Boulder resting at B; stepping on b releases it along the row/column toward b, to the end wall.</summary>
@@ -193,9 +217,9 @@ namespace LastTorch.EditorTools
                 cell += step;
 
             float radius = grid.size * 0.38f;
-            var boulder = SceneBuilder.Instantiate("Boulder", grid.World(b.x, b.y) + Vector3.up * radius, Quaternion.identity, parent);
+            var boulder = Place("Boulder", grid.World(b.x, b.y) + Vector3.up * radius, Quaternion.identity, parent, "Boulder");
 
-            var trapGo = new GameObject("BoulderTrap");
+            var trapGo = new GameObject("Boulder Trigger (b)");
             trapGo.transform.SetParent(parent, false);
             trapGo.transform.position = grid.World(trigger.x, trigger.y);
             var trap = trapGo.AddComponent<BoulderTrap>();
@@ -328,7 +352,7 @@ namespace LastTorch.EditorTools
             GameObjectUtility.SetStaticEditorFlags(walls, StaticEditorFlags.BatchingStatic);
 
             // Colliders: one box per horizontal run of '#'
-            var colliders = new GameObject("WallColliders").transform;
+            var colliders = new GameObject("Wall Colliders").transform;
             colliders.SetParent(root, false);
             for (int r = 0; r < grid.rows; r++)
             {
@@ -382,6 +406,10 @@ namespace LastTorch.EditorTools
         {
             var deco = new GameObject("Decoration").transform;
             deco.SetParent(root, false);
+            var vines = Group(deco, "Vines");
+            var glyphs = Group(deco, "Glyph Panels");
+            var rubble = Group(deco, "Rubble");
+            var pillars = Group(deco, "Broken Pillars");
             float c = grid.size, h = s.wallHeight;
             float R(float min, float max) => min + (float)rnd.NextDouble() * (max - min);
 
@@ -394,12 +422,12 @@ namespace LastTorch.EditorTools
                 if (roll < 0.15)
                 {
                     Vector3 pos = f.center + f.normal * 0.02f + f.along * R(-c * 0.3f, c * 0.3f) + Vector3.up * h;
-                    SceneBuilder.Instantiate("Vine", pos, facing, deco);
+                    Place("Vine", pos, facing, vines, "Vine " + (vines.childCount + 1));
                 }
                 else if (roll < 0.23)
                 {
                     Vector3 pos = f.center + f.normal * 0.015f + f.along * R(-c * 0.2f, c * 0.2f) + Vector3.up * R(1.6f, 2.6f);
-                    var panel = SceneBuilder.Instantiate("GlyphPanel", pos, facing, deco);
+                    var panel = Place("GlyphPanel", pos, facing, glyphs, "Glyph Panel " + (glyphs.childCount + 1));
                     panel.GetComponentInChildren<MeshRenderer>().sharedMaterial = MaterialFactory.Load("Glyph_Wall_" + (1 + rnd.Next(4)));
                 }
             }
@@ -416,7 +444,7 @@ namespace LastTorch.EditorTools
                         if (grid.IsWalkable(r + d.x, col + d.y)) { open++; openDir = d; }
                     if (open != 1) continue;
                     Vector3 pos = grid.World(r, col) - Grid.DirToWorld(openDir) * (c * 0.25f);
-                    SceneBuilder.Instantiate("Rubble", pos, Quaternion.Euler(0f, rnd.Next(360), 0f), deco);
+                    Place("Rubble", pos, Quaternion.Euler(0f, rnd.Next(360), 0f), rubble, "Rubble " + (rubble.childCount + 1));
                 }
             }
 
@@ -430,7 +458,7 @@ namespace LastTorch.EditorTools
                     bool e = grid.IsWall(cell.x, cell.y + 1), w = grid.IsWall(cell.x, cell.y - 1);
                     if (!((n || sth) && (e || w)) || grid.cells[cell.x, cell.y] != '.') continue;
                     Vector3 toCorner = new Vector3(e ? 1f : -1f, 0f, n ? 1f : -1f);
-                    SceneBuilder.Instantiate("Pillar", grid.World(cell.x, cell.y) + toCorner * (c * 0.22f), Quaternion.Euler(0f, rnd.Next(360), 0f), deco);
+                    Place("Pillar", grid.World(cell.x, cell.y) + toCorner * (c * 0.22f), Quaternion.Euler(0f, rnd.Next(360), 0f), pillars, "Broken Pillar " + (pillars.childCount + 1));
                 }
             }
         }
