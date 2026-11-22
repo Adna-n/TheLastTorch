@@ -29,6 +29,8 @@ namespace LastTorch.EditorTools
             UiVignette();
             UiBar();
             UiHeart();
+            UiDot();
+            UiArrow();
         }
 
         public static string PathOf(string name) => $"{Folder}/{AssetCategories.Texture(name)}/{name}.png";
@@ -515,6 +517,56 @@ namespace LastTorch.EditorTools
                 }
             }
             SavePixels("ui_heart", pixels, size, true, sprite: true, spriteBorder: Vector4.zero);
+        }
+
+        /// <summary>Soft-edged white circle: minimap markers.</summary>
+        public static void UiDot()
+        {
+            const int size = 64;
+            var pixels = new Color[size * size];
+            float half = size * 0.5f;
+            for (int y = 0; y < size; y++)
+            {
+                for (int x = 0; x < size; x++)
+                {
+                    float d = new Vector2(x + 0.5f - half, y + 0.5f - half).magnitude;
+                    pixels[y * size + x] = new Color(1f, 1f, 1f, Mathf.Clamp01(half - 2f - d + 0.5f));
+                }
+            }
+            SavePixels("ui_dot", pixels, size, true, sprite: true, spriteBorder: Vector4.zero);
+        }
+
+        /// <summary>White arrowhead pointing up: the player marker on the minimap.</summary>
+        public static void UiArrow()
+        {
+            const int size = 64;
+            const int ss = 4;
+            var poly = new[] { new Vector2(0.5f, 0.95f), new Vector2(0.88f, 0.06f), new Vector2(0.5f, 0.3f), new Vector2(0.12f, 0.06f) };
+            var pixels = new Color[size * size];
+            for (int y = 0; y < size; y++)
+            {
+                for (int x = 0; x < size; x++)
+                {
+                    int inside = 0;
+                    for (int sy = 0; sy < ss; sy++)
+                        for (int sx = 0; sx < ss; sx++)
+                            if (InPolygon(new Vector2((x + (sx + 0.5f) / ss) / size, (y + (sy + 0.5f) / ss) / size), poly)) inside++;
+                    pixels[y * size + x] = new Color(1f, 1f, 1f, inside / (float)(ss * ss));
+                }
+            }
+            SavePixels("ui_arrow", pixels, size, true, sprite: true, spriteBorder: Vector4.zero);
+        }
+
+        static bool InPolygon(Vector2 p, Vector2[] poly)
+        {
+            bool inside = false;
+            for (int i = 0, j = poly.Length - 1; i < poly.Length; j = i++)
+            {
+                if ((poly[i].y > p.y) != (poly[j].y > p.y) &&
+                    p.x < (poly[j].x - poly[i].x) * (p.y - poly[i].y) / (poly[j].y - poly[i].y) + poly[i].x)
+                    inside = !inside;
+            }
+            return inside;
         }
 
         // ------------------------------------------------------------------ saving

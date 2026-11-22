@@ -461,7 +461,7 @@ namespace LastTorch.EditorTools
             Visual("Tablet", visual, "Tablet", "Stone_Dark", Vector3.zero);
             Visual("Glyph_Front", visual, "Quad", name, new Vector3(0f, 0f, -0.051f), Vector3.one * 0.45f, default, false);
             Visual("Glyph_Back", visual, "Quad", name, new Vector3(0f, 0f, 0.051f), Vector3.one * 0.45f, new Vector3(0f, 180f, 0f), false);
-            AddLight(go.transform, new Vector3(0f, 1.1f, 0f), glow, 3.5f, 1.5f, false);
+            AddLight(go.transform, new Vector3(0f, 1.1f, 0f), glow, 6f, 2.5f, false); // bright enough to spot down a corridor
             MakeTrigger(go, 0.7f, new Vector3(0f, 1.1f, 0f));
             var col = go.AddComponent<Collectible>();
             col.type = CollectibleType.Key;

@@ -30,7 +30,7 @@ namespace LastTorch
             menuButton = Button(box.transform, skin, "MAIN MENU", -320f, false);
 
             var help = UIFactory.CreateText(box.transform, "Controls",
-                "WASD / Arrows  move   ·   Mouse  look\nShift  sprint   ·   E  interact   ·   Esc  resume",
+                "WASD / Arrows  move   ·   Mouse  look   ·   Shift  sprint\nE  interact   ·   M  map   ·   Esc  resume",
                 22, new Color(UISkin.Parchment.r, UISkin.Parchment.g, UISkin.Parchment.b, 0.7f));
             UIFactory.Place(help.rectTransform, new Vector2(0.5f, 0f), new Vector2(0f, 40f), new Vector2(580f, 80f));
         }

@@ -161,6 +161,8 @@ namespace LastTorch.EditorTools
                 bar = TextureGenerator.LoadSprite("ui_bar"),
                 heart = TextureGenerator.LoadSprite("ui_heart"),
                 vignette = TextureGenerator.LoadSprite("ui_vignette"),
+                dot = TextureGenerator.LoadSprite("ui_dot"),
+                arrow = TextureGenerator.LoadSprite("ui_arrow"),
                 glyphSun = TextureGenerator.Load("glyph_sun"),
                 glyphMoon = TextureGenerator.Load("glyph_moon"),
                 glyphSerpent = TextureGenerator.Load("glyph_serpent"),
@@ -169,7 +171,9 @@ namespace LastTorch.EditorTools
             UIFactory.CreateEventSystem();
 
             var ui = new GameObject("UI Controllers");
-            ui.AddComponent<HUDController>().Build(skin, canvas);
+            var hud = ui.AddComponent<HUDController>();
+            hud.Build(skin, canvas);
+            ui.AddComponent<MinimapController>().Build(skin, hud.hudGroup.transform); // hides together with the HUD
             ui.AddComponent<EndScreen>().Build(skin, canvas);
             ui.AddComponent<PauseMenu>().Build(skin, canvas);
         }
@@ -400,12 +404,12 @@ namespace LastTorch.EditorTools
             var howText = UIFactory.CreateText(howToPanel.transform, "Content",
                 "<b><color=#FF9A3C>GOAL</color></b>   Find the 3 symbol keys, open the Inner Sanctum, take the Heart of Eternity, then escape before the temple collapses.\n\n" +
                 "<b><color=#FF9A3C>CONTROLS</color></b>\n" +
-                "WASD / Arrows   Move\nMouse   Look around\nShift   Sprint (burns more fuel)\nE   Interact\nEsc   Pause\n\n" +
+                "WASD / Arrows   Move\nMouse   Look around\nShift   Sprint (burns more fuel)\nE   Interact\nM   Map (shows the keys)\nEsc   Pause\n\n" +
                 "<b><color=#FF9A3C>TIPS</color></b>\n" +
                 "•  Your torch is your life. Oil jars refuel it.\n•  Sprinting burns fuel faster.\n•  Take the Heart, then RUN.",
-                28, Parchment, TextAnchor.UpperLeft);
-            UIFactory.Stretch(howText.rectTransform, 80f, 80f, 120f, 120f);
-            howText.lineSpacing = 1.1f;
+                26, Parchment, TextAnchor.UpperLeft);
+            UIFactory.Stretch(howText.rectTransform, 80f, 80f, 110f, 110f);
+            howText.lineSpacing = 1.0f;
 
             // ---- Leaderboard
             var lbPanel = OverlayPanel(canvas, "LeaderboardPanel", "LEADERBOARD", out var backLb);

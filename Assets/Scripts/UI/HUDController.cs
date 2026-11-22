@@ -176,7 +176,7 @@ namespace LastTorch
             if (state == GameState.Playing && !shownControls && GameManager.Instance != null)
             {
                 shownControls = true;
-                GameManager.Instance.ShowHint("WASD move  ·  Mouse look  ·  Shift sprint  ·  E interact  ·  Esc pause",
+                GameManager.Instance.ShowHint("WASD move  ·  Mouse look  ·  Shift sprint  ·  E interact  ·  M map  ·  Esc pause",
                     GameManager.Settings.controlsHintDuration);
             }
         }

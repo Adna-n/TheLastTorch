@@ -185,6 +185,20 @@ namespace LastTorch
         public int sfxPoolSize = 16;
         public float sfxMaxDistance = 30f;
 
+        [Header("Minimap")]
+        public bool minimapEnabled = true;
+        [Tooltip("Show the whole maze from the start. Off = only cells you have been near are drawn.")]
+        public bool minimapRevealAll = true;
+        [Tooltip("When revealAll is off: how many cells around the player get uncovered.")]
+        public int minimapRevealRadius = 2;
+        [Tooltip("Keys, the Heart and the exit are always marked, even in unexplored areas.")]
+        public bool minimapShowObjectivesAlways = true;
+        [Tooltip("Width of the corner map in UI pixels.")]
+        public float minimapSize = 300f;
+        [Tooltip("Width of the big map (press M) in UI pixels.")]
+        public float bigMapSize = 900f;
+        [Range(0f, 1f)] public float minimapOpacity = 0.9f;
+
         [Header("Profile")]
         public int maxNameLength = 12;
         public int leaderboardSize = 5;

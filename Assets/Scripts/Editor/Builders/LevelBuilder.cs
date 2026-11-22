@@ -98,6 +98,19 @@ namespace LastTorch.EditorTools
         {
             var grid = LoadGrid(s.cellSize);
             var info = new LevelInfo();
+
+            // Keep a copy of the grid on the Level object for runtime use (minimap)
+            var layout = root.gameObject.AddComponent<LevelLayout>();
+            layout.rows = grid.rows;
+            layout.cols = grid.cols;
+            layout.cellSize = grid.size;
+            layout.lines = new string[grid.rows];
+            for (int r = 0; r < grid.rows; r++)
+            {
+                var row = new char[grid.cols];
+                for (int c2 = 0; c2 < grid.cols; c2++) row[c2] = grid.cells[r, c2];
+                layout.lines[r] = new string(row);
+            }
             var rnd = new System.Random(DecorationSeed);
             float c = grid.size, h = s.wallHeight;
 

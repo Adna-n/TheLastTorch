@@ -11,6 +11,8 @@ namespace LastTorch
         public Sprite bar;
         public Sprite heart;
         public Sprite vignette;
+        public Sprite dot;
+        public Sprite arrow;
         public Texture2D glyphSun;
         public Texture2D glyphMoon;
         public Texture2D glyphSerpent;
