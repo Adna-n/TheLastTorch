@@ -246,7 +246,9 @@ namespace LastTorch.EditorTools
                 hum.minDistance = 1f;
                 hum.maxDistance = 15f;
                 hum.rolloffMode = AudioRolloffMode.Linear;
-                MakeTrigger(heart, 0.7f, Vector3.zero);
+                // Big pickup zone: the solid altar keeps the player ~1.25 m from the Heart's centre,
+                // so the trigger must reach past the altar's edge (standing next to it on any side collects it)
+                MakeTrigger(heart, 1.7f, new Vector3(0f, -0.4f, 0f));
                 var col = heart.AddComponent<Collectible>();
                 col.type = CollectibleType.Heart;
                 col.visual = visual;
